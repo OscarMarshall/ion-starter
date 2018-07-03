@@ -3,7 +3,7 @@
 
 (ns datomic.ion.starter
   (:require
-   [clojure.data.json :as json]
+   [cheshire.core :as json]
    [clojure.edn :as edn]
    [clojure.java.io :as io]
    [clojure.pprint :as pp]
@@ -114,7 +114,7 @@ against a connection. Returns connection"
   "Lambda ion that returns sample database items matching type."
   [{:keys [input]}]
   (-> (items-by-type* (d/db (get-connection))
-                      (-> input json/read-str keyword))
+                      (-> input json/parse-string keyword))
       pp-str))
 
 (defn read-edn
@@ -149,7 +149,7 @@ against a connection. Returns connection"
 (defn add-item
   "Lambda ion that adds an item, returns database t."
   [{:keys [input]}]
-  (let [args (-> input json/read-str)
+  (let [args (-> input json/parse-string)
         conn (get-connection)
         tx [(list* 'datomic.ion.starter/create-item args)]
         result (d/transact conn {:tx-data tx})]
